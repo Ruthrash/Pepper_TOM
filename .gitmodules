@@ -1,0 +1,12 @@
+[submodule "pepper_ros"]
+	path = pepper_ros
+	url = https://github.com/Ruthrash/pepper_ros
+[submodule "darknet_ros"]
+	path = darknet_ros
+	url = https://github.com/Ruthrash/darknet_ros.git
+[submodule "ros_openpose"]
+	path = ros_openpose
+	url = https://github.com/Ruthrash/ros_openpose
+[submodule "openpose"]
+	path = openpose
+	url = https://github.com/Ruthrash/openpose.git
