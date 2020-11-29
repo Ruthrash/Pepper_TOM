@@ -42,6 +42,12 @@ Building ROS packages
 cd ~/pepper_ws
 catkin_make_isolated 
 ```
+Before using the packages inside the workspace
+
+```
+source ~/pepper_ws/devel_isolated/setup.bash
+
+```
 
 Running Simulation
 
