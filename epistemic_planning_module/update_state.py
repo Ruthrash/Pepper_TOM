@@ -4,7 +4,7 @@ import os
 # from std_msgs.msg import String
 # 
 initial_state = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atBox bx1 p1) (atBox bx2 p1) (atBox bx3 p1) [a](atBox bx1 p1) [a](atBox bx2 p1) [a](atBox bx3 p1) [b](atBox bx1 p1) [b](atBox bx2 p1) [b](atBox bx3 p1) (in b1 bx1) (in b2 bx2) (in b3 bx3) [a](in b1 bx1) [a](in b2 bx2) [a](in b3 bx3) [b](in b1 bx1) [b](in b2 bx2) [b](in b3 bx3) [a](!holding a b1) [b](!holding a b1) (dummy) (atRobot p1)"
-ROS = False
+ROS = True
 
 def run_planner(agent,goal,template_file,plan_to_execute,domain_file_name,validation):
 	curr_state_file = open('curr_state.txt','r')
@@ -294,54 +294,55 @@ def detect_and_resolve_discrepancies():
 		disc_resolving_plan_to_natural_language(emp_plan,goal)
 
 
-if ROS:
-	def callback(data):
-	    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
+# if ROS:
+def callback(data):
+    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
 
-	    update_problem_file(data.data)#,"....","curr_problem.pddl")
+    update_problem_file(data.data)#,"....","curr_problem.pddl")
 
-	    if goal_detected(data.data):
-	    	detect_and_resolve_discrepancies()
-	    	# NOTE when there is first a discrepancy between pepper's beliefs and the beliefs of other agents. when providing an explanation to 
-	    	# an agent with whom pepper has a discrepancy, pepper can tell that agent what has been observed in the span since there was no discrepancy
-	    	# in our case, pepper will tell agent b that pickup(b,b1,bx1) putIn(b,b1,bx2) enterroom(a,p1) were observed 
+    # if goal_detected(data.data):
+    # 	detect_and_resolve_discrepancies()
+    
+    	# NOTE when there is first a discrepancy between pepper's beliefs and the beliefs of other agents. when providing an explanation to 
+    	# an agent with whom pepper has a discrepancy, pepper can tell that agent what has been observed in the span since there was no discrepancy
+    	# in our case, pepper will tell agent b that pickup(b,b1,bx1) putIn(b,b1,bx2) enterroom(a,p1) were observed 
 
-	def listener():
+def listener():
 
-	    # In ROS, nodes are uniquely named. If two nodes with the same
-	    # name are launched, the previous one is kicked off. The
-	    # anonymous=True flag means that rospy will choose a unique
-	    # name for our 'listener' node so that multiple listeners can
-	    # run simultaneously.
-	    rospy.init_node('listener', anonymous=True)
+    # In ROS, nodes are uniquely named. If two nodes with the same
+    # name are launched, the previous one is kicked off. The
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'listener' node so that multiple listeners can
+    # run simultaneously.
+    rospy.init_node('listener', anonymous=True)
 
-	    rospy.Subscriber('chatter', String, callback)
+    rospy.Subscriber('chatter', String, callback)
 
-	    # spin() simply keeps python from exiting until this node is stopped
-	    rospy.spin()
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
 
 
-	if __name__ == '__main__':
-	    listener()
+if __name__ == '__main__':
+    listener()
 
-curr_state_file = open('curr_state.txt','w')
-curr_state_file.write(initial_state)
+# curr_state_file = open('curr_state.txt','w')
+# curr_state_file.write(initial_state)
 
-curr_state_file.close()
+# curr_state_file.close()
   
-observed_actions = ['(leaveRoom_b_p1)']
-update_problem_file(observed_actions)
+# observed_actions = ['(leaveRoom_b_p1)']
+# update_problem_file(observed_actions)
 
-observed_actions = ['(pickUpBlock_a_b1_bx1_p1)']
-update_problem_file(observed_actions)
+# observed_actions = ['(pickUpBlock_a_b1_bx1_p1)']
+# update_problem_file(observed_actions)
 
-observed_actions = ['(putBlockInBox_a_b1_bx2_p1)']
-update_problem_file(observed_actions)
+# observed_actions = ['(putBlockInBox_a_b1_bx2_p1)']
+# update_problem_file(observed_actions)
 
-observed_actions = ['(enterRoom_b_p1)']
-update_problem_file(observed_actions)
+# observed_actions = ['(enterRoom_b_p1)']
+# update_problem_file(observed_actions)
 
-detect_and_resolve_discrepancies()
+# detect_and_resolve_discrepancies()
 
 # goal = "(holding b b1)"
 # predicted_plan = predict_agent_plan("b",goal)
