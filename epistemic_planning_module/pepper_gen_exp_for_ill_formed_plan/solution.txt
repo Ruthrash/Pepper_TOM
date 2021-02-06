@@ -1,0 +1,4 @@
+1. (informblocklocation_b_b1_bx2)
+2. (pickupblock_b_p1)
+
+Pepper tells agent b that the block is in box2. then, the plan of picking up the block from box2 (the empathetic plan that pepper can generate by setting the goal to be (holding b b1) instaed of [b](holding b b1)) achieves [b](holding b b1)

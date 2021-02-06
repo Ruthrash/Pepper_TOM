@@ -1,0 +1,42 @@
+(pickupblock_b_b1_bx1_p1)
+
+Pepper predicts that agent b will try to pick up the block from box 1 
+
+after performing this action, we get the following state. Note that in this state the goal (holding b b1) does not hold from Pepper's perspective (it does not appear in the state, so it is false. if we run the valid_assessment with (holding b b1), we get Goal holds: False). This is therefore a discrepancy between Pepper's beliefs about the validity of the plan and its beliefs about agent b's beliefs about the validity of the plan.
+
+Assessed the following plan:
+pickUpBlock_b_b1_bx1_p1
+
+Executable: True
+Goal holds: True
+
+Final state:
+  Ba !holding_a_b1
+  Ba !in_b1_bx1
+  Ba atBox_bx1_p1
+  Ba atBox_bx2_p1
+  Ba atBox_bx3_p1
+  Ba at_a_p1
+  Ba at_b_p1
+  Ba in_b1_bx2
+  Ba in_b2_bx2
+  Ba in_b3_bx3
+  Bb !in_b1_bx1
+  Bb atBox_bx1_p1
+  Bb atBox_bx2_p1
+  Bb atBox_bx3_p1
+  Bb at_a_p1
+  Bb at_b_p1
+  Bb holding_b_b1
+  Bb in_b2_bx2
+  Bb in_b3_bx3
+  atBox_bx1_p1
+  atBox_bx2_p1
+  atBox_bx3_p1
+  atRobot_p1
+  at_a_p1
+  at_b_p1
+  dummy
+  in_b1_bx2
+  in_b2_bx2
+  in_b3_bx3

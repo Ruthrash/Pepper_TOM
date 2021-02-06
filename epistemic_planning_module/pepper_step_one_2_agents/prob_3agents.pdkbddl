@@ -1,0 +1,65 @@
+{include:domain.pdkbddl}
+
+
+(define (problem prob1)
+  (:domain grid3)
+    (:objects p1 - pos
+        b1 b2 b3 - block
+        bx1 bx2 bx3 - box
+                            )
+    (:projection )
+    (:depth 2)
+    (:task valid_assessment)
+    (:init-type complete)
+  
+  (:init
+
+  ;(at a p1)
+  ;(at b p1)
+
+  [a](at a p1)
+  [a](at b p1)
+
+  [a][b](at a p1)
+  [a][b](at b p1)
+
+  [a][c](at a p1)
+  [a][c](at b p1)
+
+  [a](atBox bx1 p1)
+  [a](atBox bx2 p1)
+  [a](atBox bx3 p1)
+
+  [a][b](atBox bx1 p1)
+  [a][b](atBox bx2 p1)
+  [a][b](atBox bx3 p1)
+
+  [a][c](atBox bx1 p1)
+  [a][c](atBox bx2 p1)
+  [a][c](atBox bx3 p1)
+
+  [a](in b1 bx1)
+  [a](in b2 bx2)
+  [a](in b3 bx3)
+
+  [a][b](in b1 bx1)
+  [a][b](in b2 bx2)
+  [a][b](in b3 bx3)
+
+  [a][c](in b1 bx1)
+  [a][c](in b2 bx2)
+  [a][c](in b3 bx3)
+
+  (dummy)
+              
+  )
+
+    (:goal 
+    (dummy) 
+                   
+    )
+    (:plan
+        (leaveRoom_b_p1)
+        ;(pickUpBlock_a_b1_bx1_p1)
+    )
+)

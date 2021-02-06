@@ -1,0 +1,7 @@
+1. (informwrongblocklocation_a_b1_p2)
+2. (move_action_1_in_plan_a_p9_p9)
+
+
+this is the system generating an explanation for Ron (that b1 is NOT in p2) that convinces him that the execution of the plan that takes him from p1 to p2 will NOT cause him to be near b1 (like the understanding that his friends are not at the first coffee shop)
+
+for Bob. the committee member, Alice tells him that the meeting is not in room A but rather in room B

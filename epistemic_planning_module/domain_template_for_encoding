@@ -1,0 +1,54 @@
+(define (domain grid)
+
+    (:agents a b)
+    (:types pos block box)
+    (:constants)
+    (:predicates
+       (at ?ag - agent ?p - pos)
+       (atBox ?bx - box ?p - pos)
+       (in ?bl - block ?bx - box)
+       (holding ?ag - agent ?bl - block)
+       (atRobot ?p - pos)
+       (dummy)
+
+       
+    ) 
+      
+
+      ;add an axiom where if an agent believes that a block is in bx1, then it believes that the block is neither ;in bx2 nor in bx3 (similarly for all boxes)     
+    
+   
+
+     (:action pickupblock
+      :derive-condition   always
+      :parameters         (?ag - agent ?bl - block ?bx - box ?p1 - pos)
+      :precondition       (and (atBox ?bx ?p1) (at ?ag ?p1))
+      :effect             (and 
+
+                                (when (atRobot ?p1) (not (in ?bl ?bx)))
+
+                                (when (in ?bl ?bx) (holding ?ag ?bl) )
+                                (when (in ?bl ?bx) (not (in ?bl ?bx)) )
+
+                                (when [?ag](in ?bl ?bx) [?ag](holding ?ag ?bl) )
+                                (when [?ag](in ?bl ?bx) [?ag](!in ?bl ?bx) )
+
+                            )
+  )
+
+  (:action informblocklocation
+      :derive-condition   always
+      :parameters         (?a1 - agent ?bl - block ?bx - box)
+      :precondition       (and (in ?bl ?bx)) 
+      :effect             (and 
+                                (forall ?bx - box
+                                  (and (when [?a1](in ?bl ?bx) [?a1](!in ?bl ?bx))
+                                  )
+                                  ) 
+                               [?a1](in ?bl ?bx))
+                                   
+    ) 
+
+
+
+)

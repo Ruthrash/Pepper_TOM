@@ -1,0 +1,25 @@
+{include:domain.pdkbddl}
+
+
+(define (problem prob1)
+  (:domain grid3)
+    (:objects p1 - pos
+        b1 b2 b3 - block
+        bx1 bx2 bx3 - box
+                            )
+    (:projection )
+    (:depth 1)
+    (:task valid_assessment)
+    (:init-type complete)
+  
+  (:init
+   [a](!at b p1) [a](!holding a b1) [a](atBox bx1 p1) [a](atBox bx2 p1) [a](atBox bx3 p1) [a](at a p1) [a](in b1 bx1) [a](in b2 bx2) [a](in b3 bx3) [b](!at b p1) [b](!holding a b1) [b](atBox bx1 p1) [b](atBox bx2 p1) [b](atBox bx3 p1) [b](at a p1) [b](in b1 bx1) [b](in b2 bx2) [b](in b3 bx3) (atBox bx1 p1) (atBox bx2 p1) (atBox bx3 p1) (atRobot p1) (at a p1) (dummy) (in b1 bx1) (in b2 bx2) (in b3 bx3)
+              
+  )
+
+    (:goal 
+    (dummy) 
+                   
+    )
+    
+)

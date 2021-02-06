@@ -1,0 +1,75 @@
+(define (domain grid)
+
+    (:agents a b c)
+    (:types pos block box)
+    (:constants)
+    (:predicates
+       (at ?ag - agent ?p - pos)
+       (atBox ?bx - box ?p - pos)
+       (in ?b - block ?bx - box)
+       (holding ?ag - agent ?b - block)
+       (dummy)
+
+       
+    ) 
+           
+    
+   (:action leaveRoom
+        :derive-condition   always
+        :parameters         (?ag - agent ?p1 - pos)
+        :precondition       (and (dummy))
+        :effect             (and 
+                
+                              (forall ?a - agent
+                                  (and (when [?a](at ?a ?p1) [?a](!at ?ag ?p1))
+                                  )
+                                  )
+                              )
+    )
+
+    (:action enterRoom
+        :derive-condition   always
+        :parameters         (?ag - agent ?p1 - pos)
+        :precondition       (and (dummy))
+        :effect             (and (!at ?ag ?p1)
+                              (forall ?a - agent
+                                  (and (when (at ?a ?p1) [?a](at ?ag ?p1))
+                                  )
+                                  )
+                              )
+    )
+
+     (:action pickUpBlock
+      :derive-condition   always
+      :parameters         (?ag - agent ?b - block ?bx - box ?p1 - pos)
+      :precondition       (and (in ?b ?bx) (atBox ?bx ?p1) (at ?ag ?p1))
+      :effect             (and 
+                              ;(!in ?b ?bx) (holding ?ag ?b)
+
+                              (forall ?a - agent
+                                  (and (when (at ?a ?p1) [?a](holding ?ag ?b))
+                                  (when (at ?a ?p1) [?a](!in ?b ?bx))
+                                  )
+                                  )
+
+                            )
+  )
+
+
+    (:action putBlockInBox
+      :derive-condition   always
+      :parameters         (?ag - agent ?b - block ?bx - box ?p1 - pos)
+      :precondition       (and (holding ?ag ?b) (atBox ?bx ?p1) (at ?ag ?p1))
+      :effect             (and (in ?b ?bx) (!holding ?ag ?b)
+                            
+
+                              (forall ?a - agent
+                                  (and (when (at ?a ?p1) [?a](!holding ?ag ?b))
+                                  (when (at ?a ?p1) [?a](in ?b ?bx))
+                                  )
+                                  )
+
+                            )
+  )
+
+)

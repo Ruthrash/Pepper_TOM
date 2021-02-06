@@ -1,0 +1,50 @@
+
+Parsing problem... done!
+Preprocessing problem... done!
+Solving problem... 
+
+# Agents: 2
+# Props: 220
+# Acts: 40
+# Effs: 2742
+Depth: 1
+done!
+
+Time: 0.641415 s
+
+Assessed the following plan:
+leaveRoom_b_p1
+
+Executable: True
+Goal holds: True
+
+Final state:
+  Ba !at_b_p1
+  Ba !holding_a_b1
+  Ba atBox_bx1_p1
+  Ba atBox_bx2_p1
+  Ba atBox_bx3_p1
+  Ba at_a_p1
+  Ba in_b1_bx1
+  Ba in_b2_bx2
+  Ba in_b3_bx3
+  Bb !at_b_p1
+  Bb !holding_a_b1
+  Bb atBox_bx1_p1
+  Bb atBox_bx2_p1
+  Bb atBox_bx3_p1
+  Bb at_a_p1
+  Bb in_b1_bx1
+  Bb in_b2_bx2
+  Bb in_b3_bx3
+  atBox_bx1_p1
+  atBox_bx2_p1
+  atBox_bx3_p1
+  atRobot_p1
+  at_a_p1
+  dummy
+  in_b1_bx1
+  in_b2_bx2
+  in_b3_bx3
+
+
