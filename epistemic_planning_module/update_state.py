@@ -2,7 +2,7 @@ import os
 
 # import rospy
 # from std_msgs.msg import String
-# 
+from gazebo_event_controller.msg import EventPublisher as Event
 initial_state = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atBox bx1 p1) (atBox bx2 p1) (atBox bx3 p1) [a](atBox bx1 p1) [a](atBox bx2 p1) [a](atBox bx3 p1) [b](atBox bx1 p1) [b](atBox bx2 p1) [b](atBox bx3 p1) (in b1 bx1) (in b2 bx2) (in b3 bx3) [a](in b1 bx1) [a](in b2 bx2) [a](in b3 bx3) [b](in b1 bx1) [b](in b2 bx2) [b](in b3 bx3) [a](!holding a b1) [b](!holding a b1) (dummy) (atRobot p1)"
 ROS = True
 
@@ -297,7 +297,8 @@ def detect_and_resolve_discrepancies():
 # if ROS:
 def callback(data):
     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-
+    #data.event, data.agent etc
+    ##please refer pepper_ros/gazebo_event_controller/msg/EventPublisher.msg for documentation of message type
     update_problem_file(data.data)#,"....","curr_problem.pddl")
 
     # if goal_detected(data.data):
@@ -316,7 +317,7 @@ def listener():
     # run simultaneously.
     rospy.init_node('listener', anonymous=True)
 
-    rospy.Subscriber('chatter', String, callback)
+    rospy.Subscriber('chatter', Event, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
