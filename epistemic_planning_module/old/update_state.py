@@ -1,10 +1,14 @@
 import os
 
-# import rospy
-# from std_msgs.msg import String
+import rospy
+from std_msgs.msg import String
 from gazebo_event_controller.msg import EventPublisher as Event
 initial_state = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atBox bx1 p1) (atBox bx2 p1) (atBox bx3 p1) [a](atBox bx1 p1) [a](atBox bx2 p1) [a](atBox bx3 p1) [b](atBox bx1 p1) [b](atBox bx2 p1) [b](atBox bx3 p1) (in b1 bx1) (in b2 bx2) (in b3 bx3) [a](in b1 bx1) [a](in b2 bx2) [a](in b3 bx3) [b](in b1 bx1) [b](in b2 bx2) [b](in b3 bx3) [a](!holding a b1) [b](!holding a b1) (dummy) (atRobot p1)"
-ROS = True
+
+leaveActTemplate = "(leaveRoom_<AGENT>_<ROOM>)"
+enterActTemplate = "(enterRoom_<AGENT>_<ROOM>)"
+pickupActTemplate = "(pickUpBlock_<AGENT>_<OBJECT>_<CONTAINER>_<ROOM>)"
+putinActTemplate = "(putBlockInBox_<AGENT>_<OBJECT>_<CONTAINER>_<ROOM>)"
 
 def run_planner(agent,goal,template_file,plan_to_execute,domain_file_name,validation):
 	curr_state_file = open('curr_state.txt','r')
@@ -294,12 +298,25 @@ def detect_and_resolve_discrepancies():
 		disc_resolving_plan_to_natural_language(emp_plan,goal)
 
 
-# if ROS:
+
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
+    # rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
     #data.event, data.agent etc
     ##please refer pepper_ros/gazebo_event_controller/msg/EventPublisher.msg for documentation of message type
-    update_problem_file(data.data)#,"....","curr_problem.pddl")
+
+    observed_action = []
+
+    if data.event.strip() == 'leave':
+    	observed_action.append(leaveActTemplate.replace('<AGENT>',data.agent.strip()).replace('<ROOM>',data.place.strip()))
+	if data.event.strip() == 'enter':
+		observed_action.append(enterActTemplate.replace('<AGENT>',data.agent.strip()).replace('<ROOM>',data.place.strip()))
+	if data.event.strip() == 'pickup':
+		observed_action.append(pickupActTemplate.replace('<AGENT>',data.agent.strip()).replace('<ROOM>',data.place.strip()).replace('<OBJECT>',data.object.strip()).replace('<CONTAINER>',data.container.strip()))
+	if data.event.strip() == 'putin':
+		observed_action.append(putinActTemplate.replace('<AGENT>',data.agent.strip()).replace('<ROOM>',data.place.strip()).replace('<OBJECT>',data.object.strip()).replace('<CONTAINER>',data.container.strip()))
+
+
+    update_problem_file(observed_action)#,"....","curr_problem.pddl")
 
     # if goal_detected(data.data):
     # 	detect_and_resolve_discrepancies()

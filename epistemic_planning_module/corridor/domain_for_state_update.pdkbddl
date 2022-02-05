@@ -1,0 +1,31 @@
+(define (domain grid)
+
+    (:agents a b c)
+    (:types quadrant)
+    (:constants)
+    (:predicates
+            (secret ?agent)
+        (at ?agent - agent ?q - quadrant)
+        (door_open)
+        (dummy)
+        (disc_resolution_two)
+        (disc_resolution)
+        (facing ?a - agent ?q - quadrant)
+
+    )
+
+     (:action leaveroomandstayoutside1
+        :derive-condition   never
+        :parameters         (?ag - agent)
+        :precondition       (and (dummy))
+        :effect             (and (!at ?ag q1) (at ?ag q5) [?ag](at ?ag q5) [?ag](!at ?ag q1)
+                              (forall ?a - agent
+                                  (and 
+                                  (when (at ?a q1) [?a](!at ?ag q1))
+                                  )
+                                  )
+                              )
+    )
+
+
+)

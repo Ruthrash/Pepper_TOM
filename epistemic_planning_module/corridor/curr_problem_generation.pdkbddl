@@ -1,0 +1,24 @@
+{include:domain_regression_based_disc_res.pdkbddl}
+
+
+(define (problem prob1)
+(:domain grid3)
+(:objects
+q1 q2 q3 q4 q5 - quadrant
+)
+(:projection )
+(:depth 2)
+(:task valid_generation)
+(:init-type complete)
+
+(:init
+(!at c q1) [a](!at c q1) [a](!at c q5) [a](at b q1) [a](door open) [b](!at c q1) [b](!at c q5) [c](!at c q1) [c](at c q5) (at a q1) (at b q1) (at c q5) (disc resolution two) (door open) (dummy)
+
+)
+
+(:goal
+(disc_resolution) (disc_resolution_two)
+
+)
+
+)

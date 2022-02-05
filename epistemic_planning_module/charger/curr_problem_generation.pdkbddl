@@ -1,0 +1,24 @@
+{include:NO_COMM_domain_regression_based_disc_res.pdkbddl}
+
+
+(define (problem prob1)
+(:domain grid3)
+(:objects p1 - pos
+q1 q2 q3 q4 q5 q6 q7 q8 q9 - quadrant
+)
+(:projection )
+(:depth 1)
+(:task valid_generation)
+(:init-type complete)
+
+(:init
+(!robotHoldingCharger) [a](chargerInQuadrant q1) [a](facing a q2) [b](facing a q2) (atRobotQuadrant q1) (atRobot p1) (chargerInQuadrant q5) (dummy) (facing a q2) (holdingCharger b)
+
+)
+
+(:goal
+(disc_resolution)
+
+)
+
+)

@@ -1,0 +1,25 @@
+{include:domain.pdkbddl}
+
+
+(define (problem prob1)
+  (:domain grid3)
+    (:objects p1 - pos
+        q1 q2 q3 q4 - quadrant
+        charger1 charger2 - thing
+                            )
+    (:projection )
+    (:depth 1)
+    (:task valid_assessment)
+    (:init-type complete)
+  
+  (:init
+  <INIT_TEMPLATE>
+              
+  )
+
+    (:goal 
+    <GOAL_TEMPLATE>
+                   
+    )
+    <TEMPLATE>
+)

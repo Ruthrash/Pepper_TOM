@@ -1,0 +1,85 @@
+(define (domain grid)
+
+    (:agents a b)
+    (:types pos thing cabinet)
+    (:constants)
+    (:predicates
+       (at ?ag - agent ?p - pos)
+       (atCabinet ?cab - cabinet ?p - pos)
+       (in ?obj - thing ?cab - cabinet)
+       (holding ?ag - agent ?obj - thing)
+       (atRobot ?p - pos)
+       (dummy)
+
+       (disc_resolution)
+       (disc_resolution_two)
+
+       
+    ) 
+      
+
+
+  (:action informspoonlocation
+      :derive-condition   always
+      :parameters         (?a1 - agent ?obj - thing ?cab - cabinet)
+      :precondition       (and (in ?obj ?cab) (at b p1)) 
+      :effect             (and 
+                                (forall ?cab - cabinet
+                                  (and (when [?a1](in ?obj ?cab) [?a1](!in ?obj ?cab))
+                                  )
+                                  ) 
+                               [?a1](in ?obj ?cab))
+                                   
+    ) 
+
+    (:action informspoonnotinlocation
+      :derive-condition   always
+      :parameters         (?a1 - agent ?obj - thing ?cab - cabinet)
+      :precondition       (and (not (in ?obj ?cab)) (at b p1))
+      :effect             (and 
+                                
+                               [?a1](!in ?obj ?cab))
+                                   
+    ) 
+
+    (:action discResolutionSpecialAction1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and  [b](!in spoon1 cabinet2)) (disc_resolution))
+                              ;the conditional effect should be (when (and (not (in spoon1 cabinet1)) [b](!in spoon1 cabinet1)) (disc_resolution_two)) but the update doesn't add (not (in spoon1 cabinet1)) to KB because of CWA
+                              )
+  )
+
+  (:action discResolutionSpecialAction2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (in spoon1 cabinet2) [b](in spoon1 cabinet2)) (disc_resolution)) 
+                              )
+  )
+
+   (:action discResolutionSpecialActionForPlanspoon1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (not (in spoon1 cabinet1)) [b](!in spoon1 cabinet1)) (disc_resolution_two))
+                              )
+                              
+  )
+
+  (:action discResolutionSpecialActionForPlanB2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (in spoon1 cabinet1) [b](in spoon1 cabinet1)) (disc_resolution_two)) 
+                              )
+  )
+
+
+
+)

@@ -1,0 +1,1 @@
+ (!robotHoldingCharger) [a](chargerInQuadrant q1) [a](facing a q2) [b](facing a q2) (atRobotQuadrant q1) (atRobot p1) (chargerInQuadrant q5) (dummy) (facing a q2) (holdingCharger b)

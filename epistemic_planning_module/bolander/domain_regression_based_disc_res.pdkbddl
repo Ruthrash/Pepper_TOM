@@ -1,0 +1,108 @@
+(define (domain grid)
+
+    (:agents a b)
+    (:types pos block box)
+    (:constants)
+    (:predicates
+       (at ?ag - agent ?p - pos)
+       (atBox ?bx - box ?p - pos)
+       (in ?b - block ?bx - box)
+       (holding ?ag - agent ?b - block)
+       (atRobot ?p - pos)
+       (dummy)
+       (plan_executed)
+
+       (disc_resolution)
+       (disc_resolution_two)
+
+       
+    ) 
+      
+
+      ;add an axiom where if an agent believes that a block is in bx1, then it believes that the block is neither ;in bx2 nor in bx3 (similarly for all boxes)     
+    
+   
+
+     (:action pickupblock
+      :derive-condition   always
+      :parameters         (?ag - agent ?p1 - pos)
+      :precondition       (and (atBox bx2 ?p1) (at b ?p1))
+      :effect             (and 
+
+                                (when (atRobot ?p1) (not (in b1 bx2)))
+
+                                (when (in b1 bx2) (holding ?ag b1) )
+                                (when (in b1 bx2) (not (in b1 bx2)) )
+
+                                (when [?ag](in b1 bx2) [?ag](holding ?ag b1) )
+                                (when [?ag](in b1 bx2) [?ag](!in b1 bx2) )
+
+                                (plan_executed)
+
+                            )
+  )
+
+  (:action informblocklocation
+      :derive-condition   always
+      :parameters         (?a1 - agent ?b - block ?bx - box)
+      :precondition       (and (in ?b ?bx) (at b p1)) 
+      :effect             (and 
+                                (forall ?bx - box
+                                  (and (when [?a1](in ?b ?bx) [?a1](!in ?b ?bx))
+                                  )
+                                  ) 
+                               [?a1](in ?b ?bx))
+                                   
+    ) 
+
+    (:action informblocknotinlocation
+      :derive-condition   always
+      :parameters         (?a1 - agent ?b - block ?bx - box)
+      :precondition       (and (not (in ?b ?bx)) (at b p1))
+      :effect             (and 
+                                
+                               [?a1](!in ?b ?bx))
+                                   
+    ) 
+
+    (:action discResolutionSpecialAction1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and  [b](!in b1 bx1)) (disc_resolution))
+                              ;the conditional effect should be (when (and (not (in b1 bx2)) [b](!in b1 bx2)) (disc_resolution_two)) but the update doesn't add (not (in b1 bx2)) to KB because of CWA
+                              )
+  )
+
+  (:action discResolutionSpecialAction2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (in b1 bx1) [b](in b1 bx1)) (disc_resolution)) 
+                              )
+  )
+
+   (:action discResolutionSpecialActionForPlanB1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (not (in b1 bx2)) [b](!in b1 bx2)) (disc_resolution_two))
+                              )
+                              
+  )
+
+  (:action discResolutionSpecialActionForPlanB2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (in b1 bx2) [b](in b1 bx2)) (disc_resolution_two)) 
+                              )
+  )
+
+
+
+)

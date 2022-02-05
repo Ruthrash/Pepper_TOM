@@ -1,0 +1,25 @@
+{include:domain_regression_based_disc_res.pdkbddl}
+
+
+(define (problem prob1)
+(:domain grid3)
+(:objects p1 - pos
+spoon1 bowl1 - thing
+cabinet1 cabinet2 cabinet3 - cabinet
+)
+(:projection )
+(:depth 1)
+(:task valid_generation)
+(:init-type complete)
+
+(:init
+[a](!at a p1) [a](!holding a spoon1) [a](!holding b spoon1) [a](!in spoon1 cabinet2) [a](atCabinet cabinet1 p1) [a](atCabinet cabinet2 p1) [a](at b p1) [a](dummy) [a](in bowl1 cabinet3) [a](in spoon1 cabinet1) [b](!holding b spoon1) [b](atCabinet cabinet1 p1) [b](atCabinet cabinet2 p1) [b](at b p1) [b](dummy) [b](in bowl1 cabinet3) [b](in spoon1 cabinet2) (atCabinet cabinet1 p1) (atCabinet cabinet2 p1) (atRobot p1) (at b p1) (dummy) (in bowl1 cabinet3) (in spoon1 cabinet1)
+
+)
+
+(:goal
+(disc_resolution) (disc_resolution_two)
+
+)
+
+)

@@ -1,0 +1,89 @@
+(define (domain grapevine)
+
+    (:agents a b c)
+    (:types quadrant)
+    (:constants )
+
+    (:predicates
+            (secret ?agent)
+        (at ?agent - agent ?q - quadrant)
+        (door_open)
+        (dummy)
+        (disc_resolution_two)
+        (disc_resolution)
+    )
+
+   
+
+
+(:action informAgentLoc
+      :derive-condition   never
+      :parameters         (?a1 ?a2 - agent ?q - quadrant)
+      :precondition       (and (at ?a2 ?q)) 
+      :effect             (and 
+
+                               [?a1](at ?a2 ?q))
+                                   
+    )
+
+    (:action informDoorClosed
+      :derive-condition   never
+      :parameters         (?a1 - agent)
+      :precondition       (and (not(door_open)))
+      :effect             (and 
+                                
+                               [?a1](!door_open))
+                                   
+    )
+
+    (:action informDoorOpen
+      :derive-condition   never
+      :parameters         (?a1 - agent)
+      :precondition       (and (door_open))
+      :effect             (and 
+                                
+                               [?a1](door_open))
+                                   
+    )
+
+
+        (:action closeDoor
+      :derive-condition   never
+      :parameters         ()
+      :precondition       (and (dummy))
+      :effect             (and
+                                
+                               (!door_open)
+
+                              ; (forall ?a - agent
+                              ;    (and 
+                              ;    (when (at ?a q1) [?a](!door_open))
+                              ;    )
+                              ;    )
+
+
+                               )
+                                   
+    )
+
+    (:action discResolutionSpecialAction1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (at c q5) [a](at c q5)) (disc_resolution) )
+                              )
+  )
+
+  (:action discResolutionSpecialAction2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (not (door_open) )  ) (disc_resolution) ) 
+                              )
+  )
+
+)
+
+

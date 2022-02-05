@@ -1,0 +1,153 @@
+(define (domain grid)
+
+    (:agents a b)
+    (:types pos quadrant thing)
+    (:constants)
+    (:predicates
+       (at ?ag - agent ?p - pos)
+       (atAgentQuadrant ?ag - agent ?q - quadrant)
+       (holding ?ag - agent ?o - thing)
+       (holdingCharger ?ag - agent)
+       (atRobot ?p - pos)
+       (dummy)
+       (facing ?a - agent ?q - quadrant)
+       (objInQuadrant ?o - thing ?q - quadrant)
+       (inQuadrant ?p - pos ?q - quadrant)
+       (atCharger ?c - thing ?q - quadrant)
+       (chargerInQuadrant ?q - quadrant)
+       (khowPreservingGoal)
+       
+    ) 
+      
+
+
+ 
+
+;we can have a (facing_xxx) predicate and an axiom action that updates pepper's beliefs such that if agent i is ;facing xxx, then if an thing is (within_scope/eye sight/...) of xxx, then agent i believes that that thing is ;there (because it sees it). 
+;so this is an observation for pepper:
+;(is_facing_xxx human1) and then when the human glances we have (is_facing_yyy human) followed by (is_facing_xxx ;human1)
+
+
+
+    (:action update_vision_based_beliefs
+        :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (forall ?a - agent
+                                (forall ?q - quadrant
+                                  (forall ?o - thing
+                                      (and (when (and (facing ?a ?q) (chargerInQuadrant ?q)) [?a](chargerInQuadrant ?q))
+                                      )
+                                      )
+                                  )
+                               )
+                              )
+    )
+  
+
+  (:action shiftgaze
+        :derive-condition   always
+        :parameters         (?ag - agent ?q - quadrant)
+        :precondition       (and (dummy))
+        :effect             (and 
+                               (facing ?ag ?q)
+                              )
+    )
+
+    ; should be called every time before shiftgaze is called
+    (:action shiftgaze_reset
+        :derive-condition   always
+        :parameters         (?ag - agent)
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (forall ?q - quadrant
+                                  (not (facing ?ag ?q))
+                                  )
+                            )
+                              
+    )
+
+
+      ;add an axiom where if an agent believes that a block is in bx1, then it believes that the block is neither ;in bx2 nor in bx3 (similarly for all boxes)     
+    
+   (:action leaveroom1
+        :derive-condition   always
+        :parameters         (?ag - agent ?p - pos)
+        :precondition       (and (dummy))
+        :effect             (and (not (at ?ag ?p))
+                              
+                              )
+    )
+
+    (:action enterroom1
+        :derive-condition   always
+        :parameters         (?ag - agent ?p - pos)
+        :precondition       (and (dummy))
+        :effect             (and (at ?ag ?p)
+                              
+                              )
+    )
+
+    (:action chargerAxiom
+        :derive-condition   always
+        :parameters         (?c - thing ?q - quadrant)
+        :precondition       (and (dummy))
+        :effect             (and (when (atCharger ?c ?q) (chargerInQuadrant ?q))
+                              (forall ?a - agent
+                                  (and (when [?a](atCharger ?c ?q) [?a](chargerInQuadrant ?q))
+                                  )
+                                  )
+                              )
+    )
+
+
+ 
+  (:action update_vision_based_beliefs_old
+        :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (forall ?a - agent
+                                (forall ?q - quadrant
+                                  (forall ?o - thing
+                                      (and (when (and (facing ?a ?q) (objInQuadrant ?o ?q)) [?a](atCharger ?o ?q))
+                                      )
+                                      )
+                                  )
+                               )
+                              )
+    )
+
+     ; CHANGE FROM OBJ IN QUADRANT TO CHARGER. IN QUADRANT
+
+     (:action pickupcharger
+      :derive-condition   always
+      :parameters         (?ag - agent ?q - quadrant)
+      :precondition       (and (dummy))
+      :effect             (and 
+
+
+                                (when (atRobotQuadrant ?q) (not (chargerInQuadrant ?q)))
+
+                                (when (atRobotQuadrant ?q) (not (chargerInQuadrant ?q)))
+
+                                (when (atRobotQuadrant ?q) (holdingCharger ?ag))
+
+                              
+
+                                (forall ?a - agent
+                                    (and 
+                                    (when (and (facing ?a ?q)) [?a](holdingCharger ?ag))
+
+                                    (when (and (not (facing ?a ?q)) [?a](!chargerInQuadrant ?q)) [?a](!chargerInQuadrant ?q))
+                                    (when (and (not (facing ?a ?q)) [?a](chargerInQuadrant ?q)) [?a](chargerInQuadrant ?q))
+                                    
+                                    )
+                              )
+                            )
+
+        )
+
+  
+)

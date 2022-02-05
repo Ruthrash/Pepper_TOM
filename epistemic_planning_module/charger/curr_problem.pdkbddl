@@ -1,0 +1,25 @@
+{include:domain_for_state_update.pdkbddl}
+
+
+(define (problem prob1)
+(:domain grid3)
+(:objects p1 - pos
+q1 q2 q3 q4 - quadrant
+charger1 charger2 - thing
+)
+(:projection )
+(:depth 1)
+(:task valid_assessment)
+(:init-type complete)
+
+(:init
+(!robotHoldingCharger) [a](at b p1) [a](chargerInQuadrant q1) [a](facing a q2) [b](at b p1) [b](facing a q2) (atRobotQuadrant q1) (atRobot p1) (at b p1) (chargerInQuadrant q5) (dummy) (facing a q2) (holdingCharger b)
+
+)
+
+(:goal
+(dummy)
+
+)
+(:plan (leaveroom1_b_p1)  )
+)

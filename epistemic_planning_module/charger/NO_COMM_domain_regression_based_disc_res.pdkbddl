@@ -1,0 +1,155 @@
+(define (domain grid)
+
+    (:agents a b)
+    (:types pos quadrant)
+    (:constants)
+    (:predicates
+       (at ?ag - agent ?p - pos)
+       (atAgentQuadrant ?ag - agent ?q - quadrant)
+       
+       (holdingCharger ?ag - agent)
+       (robotHoldingCharger)
+       (atRobot ?p - pos)
+       (dummy)
+       (facing ?a - agent ?q - quadrant)
+       
+       (inQuadrant ?p - pos ?q - quadrant)
+       
+       (chargerInQuadrant ?q - quadrant)
+       (khowPreservingGoal)
+       (atRobotQuadrant ?q - quadrant)
+       (disc_resolution)
+       (disc_resolution_two)
+       
+    ) 
+    
+
+    (:action robotpickupcharger
+      :derive-condition   always
+      :parameters         (?q - quadrant)
+      :precondition       (and (dummy))
+      :effect             (and 
+
+
+                                (when (and (atRobotQuadrant ?q) (chargerInQuadrant ?q)) (not (chargerInQuadrant ?q)))
+
+                                (when (and (atRobotQuadrant ?q) (chargerInQuadrant ?q)) (robotHoldingCharger))
+
+                              
+
+                              (forall ?a - agent
+                                  (and 
+                                  (when (and (facing ?a ?q)) [?a](robotHoldingCharger))
+
+                                  (when (and (facing ?a ?q)) [?a](!chargerInQuadrant ?q))
+
+                                  (when (and (not (facing ?a ?q)) [?a](!chargerInQuadrant ?q)) [?a](!chargerInQuadrant ?q))
+
+                                  (when (and (not (facing ?a ?q)) [?a](chargerInQuadrant ?q)) [?a](chargerInQuadrant ?q))
+
+                                  (when (and (not (facing ?a ?q)) [?a](robotHoldingCharger)) [?a](robotHoldingCharger))
+
+                                  (when (and (not (facing ?a ?q)) [?a](!robotHoldingCharger)) [?a](!robotHoldingCharger))
+                                  
+                                  
+                                  )
+                                  )
+
+                            )
+  )
+
+
+  (:action robotdropoffcharger
+      :derive-condition   always
+      :parameters         (?q - quadrant)
+      :precondition       (and (atRobotQuadrant ?q) (robotHoldingCharger))
+      :effect             (and 
+
+
+                                (when (and (atRobotQuadrant ?q) (robotHoldingCharger)) (chargerInQuadrant ?q))
+
+                                (when (and (atRobotQuadrant ?q) (robotHoldingCharger)) (not (robotHoldingCharger)))
+
+                              
+
+                              (forall ?a - agent
+                                  (and 
+                                  (when (and (facing ?a ?q)) [?a](!robotHoldingCharger))
+
+                                  (when (and (facing ?a ?q)) [?a](chargerInQuadrant ?q))
+
+                                  (when (and (not (facing ?a ?q)) [?a](!chargerInQuadrant ?q)) [?a](!chargerInQuadrant ?q))
+
+                                  (when (and (not (facing ?a ?q)) [?a](chargerInQuadrant ?q)) [?a](chargerInQuadrant ?q))
+
+                                  (when (and (not (facing ?a ?q)) [?a](robotHoldingCharger)) [?a](robotHoldingCharger))
+
+                                  (when (and (not (facing ?a ?q)) [?a](!robotHoldingCharger)) [?a](!robotHoldingCharger))
+                                  
+                                  
+                                  )
+                                  )
+
+                            )
+  )
+
+  (:action robotMove
+      :derive-condition   always
+      :parameters         (?qOld - quadrant ?qNew - quadrant)
+      :precondition       (and (dummy))
+      :effect             (and 
+
+
+                                (when (atRobotQuadrant ?qOld) (atRobotQuadrant ?qNew))
+
+                                (when (atRobotQuadrant ?qOld) (not (atRobotQuadrant ?qOld)))
+
+                            )
+  )
+    
+  
+
+  
+
+ (:action discResolutionSpecialAction1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and [a](!chargerInQuadrant q1)) (disc_resolution))
+                              )
+  )
+
+  ;(not (chargerInQuadrant q1)) should be in conditional effect but it doesn't appear in KB after updates
+
+  (:action discResolutionSpecialAction2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (chargerInQuadrant q1) [a](chargerInQuadrant q1)) (disc_resolution)) 
+                              )
+  )
+
+   (:action discResolutionSpecialActionForPlanB1
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (not (chargerInQuadrant q5)) [a](!chargerInQuadrant q5)) (disc_resolution_two))
+                              )
+  )
+
+  ;(not (chargerInQuadrant q5)) should be in conditional effect but it doesn't appear in KB after updates
+
+  (:action discResolutionSpecialActionForPlanB2
+      :derive-condition   always
+        :parameters         ()
+        :precondition       (and (dummy))
+        :effect             (and 
+                              (when (and (chargerInQuadrant q5) [a](chargerInQuadrant q5)) (disc_resolution_two)) 
+                              )
+  )
+
+
+)

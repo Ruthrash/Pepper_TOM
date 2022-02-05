@@ -1,0 +1,24 @@
+{include:domain_for_state_update.pdkbddl}
+
+
+(define (problem prob1)
+(:domain grid3)
+(:objects
+q1 q2 q3 q4 q5 - quadrant
+)
+(:projection )
+(:depth 1)
+(:task valid_assessment)
+(:init-type complete)
+
+(:init
+(dummy) (door_open) [a](door_open) (at a q1) (at b q1) [a](at b q1) [a](at c q1) [a](!at c q5) [b](!at c q5) (at c q1) (disc_resolution_two)
+
+)
+
+(:goal
+(dummy)
+
+)
+(:plan (leaveroomandstayoutside1_c)  )
+)
