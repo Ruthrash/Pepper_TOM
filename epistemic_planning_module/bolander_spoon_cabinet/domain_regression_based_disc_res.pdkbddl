@@ -19,7 +19,7 @@
       
 
 
-  (:action informspoonlocation
+  (:action informbowllocation
       :derive-condition   always
       :parameters         (?a1 - agent ?obj - thing ?cab - cabinet)
       :precondition       (and (in ?obj ?cab) (at b p1)) 
@@ -32,7 +32,7 @@
                                    
     ) 
 
-    (:action informspoonnotinlocation
+    (:action informbowlnotinlocation
       :derive-condition   always
       :parameters         (?a1 - agent ?obj - thing ?cab - cabinet)
       :precondition       (and (not (in ?obj ?cab)) (at b p1))
@@ -47,8 +47,8 @@
         :parameters         ()
         :precondition       (and (dummy))
         :effect             (and 
-                              (when (and  [b](!in spoon1 cabinet2)) (disc_resolution))
-                              ;the conditional effect should be (when (and (not (in spoon1 cabinet1)) [b](!in spoon1 cabinet1)) (disc_resolution_two)) but the update doesn't add (not (in spoon1 cabinet1)) to KB because of CWA
+                              (when (and  [b](!in bowl1 cabinet2)) (disc_resolution))
+                              ;the conditional effect should be (when (and (not (in bowl1 cabinet1)) [b](!in bowl1 cabinet1)) (disc_resolution_two)) but the update doesn't add (not (in bowl1 cabinet1)) to KB because of CWA
                               )
   )
 
@@ -57,16 +57,16 @@
         :parameters         ()
         :precondition       (and (dummy))
         :effect             (and 
-                              (when (and (in spoon1 cabinet2) [b](in spoon1 cabinet2)) (disc_resolution)) 
+                              (when (and (in bowl1 cabinet2) [b](in bowl1 cabinet2)) (disc_resolution)) 
                               )
   )
 
-   (:action discResolutionSpecialActionForPlanspoon1
+   (:action discResolutionSpecialActionForPlanbowl1
       :derive-condition   always
         :parameters         ()
         :precondition       (and (dummy))
         :effect             (and 
-                              (when (and (not (in spoon1 cabinet1)) [b](!in spoon1 cabinet1)) (disc_resolution_two))
+                              (when (and (not (in bowl1 cabinet1)) [b](!in bowl1 cabinet1)) (disc_resolution_two))
                               )
                               
   )
@@ -76,7 +76,7 @@
         :parameters         ()
         :precondition       (and (dummy))
         :effect             (and 
-                              (when (and (in spoon1 cabinet1) [b](in spoon1 cabinet1)) (disc_resolution_two)) 
+                              (when (and (in bowl1 cabinet1) [b](in bowl1 cabinet1)) (disc_resolution_two)) 
                               )
   )
 

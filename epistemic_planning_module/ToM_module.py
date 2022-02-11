@@ -7,12 +7,13 @@ import subprocess
 # from gazebo_event_controller.srv import EventServer, EventServerRequest, EventServerResponse
 # from gazebo_event_controller.srv import ActionServer, ActionServerRequest
 
-global_current_domain = "charger" #"bolander_spoon_cabinet"
+global_current_domain = "bolander_spoon_cabinet" #"corridor"
 
 # 
 initial_state_bolander = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atBox bx1 p1) (atBox bx2 p1) (atBox bx3 p1) [a](atBox bx1 p1) [a](atBox bx2 p1) [a](atBox bx3 p1) [b](atBox bx1 p1) [b](atBox bx2 p1) [b](atBox bx3 p1) (in b1 bx1) (in b2 bx2) (in b3 bx3) [a](in b1 bx1) [a](in b2 bx2) [a](in b3 bx3) [b](in b1 bx1) [b](in b2 bx2) [b](in b3 bx3) [a](!holding a b1) [b](!holding a b1) (dummy) (atRobot p1)"
 
-initial_state_bolander_spoon_cabinet = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atCabinet cabinet1 p1) (atCabinet cabinet2 p1) [a](atCabinet cabinet1 p1) [a](atCabinet cabinet2 p1) [b](atCabinet cabinet1 p1) [b](atCabinet cabinet2 p1)  (holding b spoon1)  [a](holding b spoon1) [b](holding b spoon1) (dummy) (atRobot p1) (in bowl1 cabinet3) [a](in bowl1 cabinet3) [b](in bowl1 cabinet3)"
+#initial_state_bolander_spoon_cabinet = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atCabinet cabinet1 p1) (atCabinet cabinet2 p1) [a](atCabinet cabinet1 p1) [a](atCabinet cabinet2 p1) [b](atCabinet cabinet1 p1) [b](atCabinet cabinet2 p1)  (holding b spoon1)  [a](holding b spoon1) [b](holding b spoon1) (dummy) (atRobot p1) (in bowl1 cabinet3) [a](in bowl1 cabinet3) [b](in bowl1 cabinet3)"
+initial_state_bolander_spoon_cabinet = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atCabinet cabinet1 p1) (atCabinet cabinet2 p1) [a](atCabinet cabinet1 p1) [a](atCabinet cabinet2 p1) [b](atCabinet cabinet1 p1) [b](atCabinet cabinet2 p1)  (holding b bowl1)  [a](holding b bowl1) [b](holding b bowl1) (dummy) (atRobot p1) (in spoon1 cabinet3) [a](in spoon1 cabinet3) [b](in spoon1 cabinet3)"
 
 #initial_state_charger_scenario = "(atRobotQuadrant q1) (at a p1) [a](at a p1) (atRobot p3) (chargerInQuadrant q5) chargerInQuadrant q1) (not (robotHoldingCharger))  (objInQuadrant charger1 q1) [a](!objInQuadrant charger1 q1) (facing a q2) (dummy) (atRobot p1) (not (khowPreservingGoal))"
 initial_state_charger = "(atRobotQuadrant q1) (chargerInQuadrant q5) (chargerInQuadrant q1) (!robotHoldingCharger)   (facing a q2) (dummy) (atRobot p1)"#" (!khowPreservingGoal) (!disc_resolution) (!disc_resolution_two)"
@@ -191,8 +192,10 @@ def parse_final_state():
 
 
 def update_problem_file(observed_actions):#,domain_file,problem_file):
-	if observed_actions[0].find('takeobjectoutofcabinet') !=1 and observed_actions[0].find("bowl") != -1:
+	
+	if observed_actions[0].strip().lower() == '(takeobjectoutofcabinet_b_spoon1_cabinet3_p1)'.strip().lower(): #observed_actions[0].find('takeobjectoutofcabinet') !=1 and observed_actions[0].find("spoon") != -1:
 		return 0
+
 
 	if live:
 
@@ -425,22 +428,22 @@ def parse_inform_action(act):
 		
 		
 
-	if act.find("spoonlocation") != -1:
-		inform_content = act.replace("(informspoonlocation b","")
+	if act.find("bowllocation") != -1:
+		inform_content = act.replace("(informbowllocation b","")
 		inform_content_split = inform_content.strip().split(" ")
 
-		explanation = "If you are looking for the spoon, it is in {0}".format(inform_content_split[1].replace("(",""))
+		explanation = "If you are looking for the bowl, it is in {0}".format(inform_content_split[1].replace("(",""))
 		
 		
 		
 
-	if act.find("spoonnotinlocation") != -1:
+	if act.find("bowlnotinlocation") != -1:
 		
-		inform_content = act.replace("(informspoonnotinlocation b","")
+		inform_content = act.replace("(informbowlnotinlocation b","")
 		
 		inform_content_split = inform_content.strip().split(" ")
 
-		explanation = "If you are looking for the spoon, it is NOT in {0}".format(inform_content_split[1].replace("(",""))
+		explanation = "If you are looking for the bowl, it is NOT in {0}".format(inform_content_split[1].replace("(",""))
 		
 		
 
@@ -636,8 +639,8 @@ def resolve_disc_bolander(req,version):
 	# 2 is with ToM
 
 	if version == '2':
-		if req.agent == 'a' and req.event == 'pickup' and req.object == 'bowl':
-			send_action_request("The spoon is not in cabinet2, it is in cabinet1",speech/communication)
+		if req.agent == 'a' and req.event == 'pickup' and req.object == 'spoon':
+			send_action_request("The bowl is not in cabinet2, it is in cabinet1",speech/communication)
 
 def resolve_disc_corridor(req,version):
 	# depending on the observation in req, we either do nothing or send an action request depending on the
@@ -705,7 +708,7 @@ def detect_and_resolve_discrepancies(req):#(req):
 					print(parse_plan())
 				else:
 					# TODO change the  disc res goal after pepper changes the plan that it believes will achieve the human's goal (the assistive solution). we do this manually for now
-					if 1:#(req.scenario == 'charger' and req.version == 'x') or (not newEmpatheticPlan):
+					if (req.scenario == 'charger' and req.version == 'x') or (req.scenario == 'corridor' and req.version == 'x') or (not newEmpatheticPlan):
 						plan = run_planner(-1,"(disc_resolution)","prob_template_generation.pdkbddl",[],"NO_COMM_domain_regression_based_disc_res.pdkbddl",False)
 						send_pepper_plan_to_action_server(parse_plan(),"")
 					else:
@@ -873,8 +876,12 @@ def generate_knowhow_preserving_plan(goal):
 	
 
 def goal_detected(req):
-	if req.event == 'takeobjectoutofcabinet' and req.object.find("bowl") != -1:
-		return True
+	if req.scenario == 'bolander_spoon_cabinet':
+		if req.event == 'takeobjectoutofcabinet' and req.object.find("spoon") != -1:
+			return True
+		else:
+			return False
+	return True
 
 def format_observations(req):
 	# either standardize all actions' parameter order so that agent appears before objects that appears before ..
@@ -1058,7 +1065,7 @@ if global_current_domain == 'bolander_spoon_cabinet':
 	observed_actions = ['(opencabinet_b_cabinet2_p1)']
 	update_problem_file(observed_actions)
 
-	observed_actions = ['(putobjectincabinet_b_spoon1_cabinet2_p1)']
+	observed_actions = ['(putobjectincabinet_b_bowl1_cabinet2_p1)']
 	update_problem_file(observed_actions)
 
 	observed_actions = ['(closecabinet_b_cabinet2_p1)']
@@ -1074,7 +1081,7 @@ if global_current_domain == 'bolander_spoon_cabinet':
 	observed_actions = ['(opencabinet_a_cabinet2_p1)']
 	update_problem_file(observed_actions)
 
-	observed_actions = ['(takeobjectoutofcabinet_a_spoon1_cabinet2_p1)']
+	observed_actions = ['(takeobjectoutofcabinet_a_bowl1_cabinet2_p1)']
 	update_problem_file(observed_actions)
 
 	observed_actions = ['(closecabinet_a_cabinet2_p1)']
@@ -1083,7 +1090,7 @@ if global_current_domain == 'bolander_spoon_cabinet':
 	observed_actions = ['(opencabinet_a_cabinet1_p1)']
 	update_problem_file(observed_actions)
 
-	observed_actions = ['(putobjectincabinet_a_spoon1_cabinet1_p1)']
+	observed_actions = ['(putobjectincabinet_a_bowl1_cabinet1_p1)']
 	update_problem_file(observed_actions)
 
 	observed_actions = ['(closecabinet_a_cabinet1_p1)']
@@ -1098,8 +1105,10 @@ if global_current_domain == 'bolander_spoon_cabinet':
 	observed_actions = ['(opencabinet_b_cabinet3_p1)']
 	update_problem_file(observed_actions)
 
-	# observed_actions = ['(takeobjectoutofcabinet_b_bowl1_cabinet3_p1)']
-	# update_problem_file(observed_actions)
+
+
+	observed_actions = ['(takeobjectoutofcabinet_b_spoon1_cabinet3_p1)']
+	update_problem_file(observed_actions)
 
 	# print("AFTER (takeobjectoutofcabinet_b_bowl1_cabinet3_p1)")
 	detect_and_resolve_discrepancies(req)
@@ -1115,7 +1124,7 @@ if global_current_domain == 'bolander_spoon_cabinet':
 # first human is agent a, second human is agent b
 # goal is (and (charged phone_a))
 
-if global_current_domain == 'charger':
+if global_current_domain == 'charger' or global_current_domain == 'charger_kHow':
 
 	curr_state_file = open('curr_state.txt','w')
 	curr_state_file.write(initial_state_charger)
@@ -1127,6 +1136,9 @@ if global_current_domain == 'charger':
 	print(initial_state_charger)
 	print("====================\n")
 	  
+	# observed_actions = ['(plugincharger_a_q1)']
+	# update_problem_file(observed_actions)
+
 	observed_actions = ['(shiftgaze_reset_a)']
 	update_problem_file(observed_actions)
 
@@ -1148,7 +1160,7 @@ if global_current_domain == 'charger':
 	observed_actions = ['(update_vision_based_beliefs)']
 	update_problem_file(observed_actions)
 
-	if 0:
+	if global_current_domain == 'charger_kHow':
 		#Pepper receives message from human and is tasked with bringing a charger to room3 (other charger is in room2)
 		generate_knowhow_preserving_plan("(chargerInQuadrant q9)") #q9 is in room3
 
@@ -1189,6 +1201,8 @@ if global_current_domain == 'corridor':
 	print("====================\n")
 	print(initial_state_corridor_scenario)
 	print("====================\n")
+
+	# the first observation is person c entering the room
 
 	observed_actions = ['(leaveroomAndStayOutside1_c)'] # to update KB, we observe leaveroomAndStayOutside1
 	update_problem_file(observed_actions)
