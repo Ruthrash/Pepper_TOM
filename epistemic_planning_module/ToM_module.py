@@ -1,13 +1,16 @@
 import os
 import subprocess
+import sys
 
 # from std_msgs.msg import String
 
-# import rospy
-# from gazebo_event_controller.srv import EventServer, EventServerRequest, EventServerResponse
-# from gazebo_event_controller.srv import ActionServer, ActionServerRequest
+import rospy
+from gazebo_event_controller.srv import EventServer, EventServerRequest, EventServerResponse
+from gazebo_event_controller.srv import ActionServer, ActionServerRequest
 
-global_current_domain = "bolander_spoon_cabinet" #"corridor"
+global_current_domain = "" # "bolander_spoon_cabinet" #"corridor"
+
+disc_res_modality = "nocomm"
 
 # 
 initial_state_bolander = "(at a p1) (at b p1) [a](at a p1) [a](at b p1) [b](at a p1) [b](at b p1) (atBox bx1 p1) (atBox bx2 p1) (atBox bx3 p1) [a](atBox bx1 p1) [a](atBox bx2 p1) [a](atBox bx3 p1) [b](atBox bx1 p1) [b](atBox bx2 p1) [b](atBox bx3 p1) (in b1 bx1) (in b2 bx2) (in b3 bx3) [a](in b1 bx1) [a](in b2 bx2) [a](in b3 bx3) [b](in b1 bx1) [b](in b2 bx2) [b](in b3 bx3) [a](!holding a b1) [b](!holding a b1) (dummy) (atRobot p1)"
@@ -21,7 +24,7 @@ initial_state_charger = "(atRobotQuadrant q1) (chargerInQuadrant q5) (chargerInQ
 initial_state_corridor_scenario = "(dummy) (door_open) [a](door_open) (at a q1) (at b q1) [a](at b q1) [a](at c q1) [a](!at c q5) [b](!at c q5) (at c q1) (disc_resolution_two)"
 initial_state_kitchen = "(and (dummy) (not (pepper_near_cabinet)) (not (elim_t2_t3_t4)) (not (elim_t1_t3_t4)) (not (elim_t1_t2_t4)) (not (elim_t1_t2_t3)) (K_pepper (or (and (at_bowl_cabinet) (at_spoon_cabinet) (K_human (and (at_bowl_cabinet) (at_spoon_cabinet) (not (at_spoon_dishwasher)) (not (at_bowl_dishwasher)) ) )) (and (at_bowl_cabinet) (not (at_spoon_cabinet)) (at_spoon_dishwasher) (K_human (and (at_bowl_cabinet) (not (at_spoon_cabinet)) (at_spoon_dishwasher) ) )) (and (not (at_bowl_cabinet)) (at_spoon_cabinet) (at_bowl_bedroom) (K_human (and (not (at_bowl_cabinet)) (at_spoon_cabinet) (at_bowl_dishwasher) ) )) (and (not (at_bowl_cabinet)) (not (at_spoon_cabinet)) (at_bowl_bedroom) (at_spoon_dishwasher) (K_human (and (not (at_bowl_cabinet)) (not (at_spoon_cabinet)) (at_bowl_dishwasher) (at_spoon_dishwasher) ) )) ) ) )"
 
-ROS = False
+ROS = True
 live = True
 simplified = True
 newEmpatheticPlan = False
@@ -708,7 +711,7 @@ def detect_and_resolve_discrepancies(req):#(req):
 					print(parse_plan())
 				else:
 					# TODO change the  disc res goal after pepper changes the plan that it believes will achieve the human's goal (the assistive solution). we do this manually for now
-					if (req.scenario == 'charger' and req.version == 'x') or (req.scenario == 'corridor' and req.version == 'x') or (not newEmpatheticPlan):
+					if disc_res_modality == 'nocomm': # (req.scenario == 'charger' and req.version == 'x') or (req.scenario == 'corridor' and req.version == 'x') or (not newEmpatheticPlan):
 						plan = run_planner(-1,"(disc_resolution)","prob_template_generation.pdkbddl",[],"NO_COMM_domain_regression_based_disc_res.pdkbddl",False)
 						send_pepper_plan_to_action_server(parse_plan(),"")
 					else:
@@ -876,7 +879,7 @@ def generate_knowhow_preserving_plan(goal):
 	
 
 def goal_detected(req):
-	if req.scenario == 'bolander_spoon_cabinet':
+	if global_current_domain == 'bolander': # req.scenario == 'bolander_spoon_cabinet':
 		if req.event == 'takeobjectoutofcabinet' and req.object.find("spoon") != -1:
 			return True
 		else:
@@ -896,7 +899,7 @@ def format_observations(req):
 		observed_actions.append('(update_vision_based_beliefs)')
 		observed_actions.append('(shiftgaze_reset)')
 
-	if req.event == 'leaveRoom' and req.scenario == 'corridor':
+	if req.event == 'leaveRoom' and global_current_domain == 'corridor': # req.scenario == 'corridor':
 		# do the following unless event server can send the leaveroomAndStayOutside1 observation after seeing that Eve left room but stayed outside
 		observed_actions = []
 		observed_actions.append('(leaveroomAndStayOutside1'.lower() + "_" + req.agent + req.place + ")")
@@ -918,7 +921,7 @@ if ROS:
 		update_problem_file(observed_actions)
 
 		# either add a sympathetic attribute to req or just have a bigger conditional with the specifc scenario + version combos that are the control condition
-		if req.sympathetic:
+		if global_current_domain == 'sympathetic': # req.sympathetic:
 			# check this using req.scenario and req.version
 			if CHARGER_CONTROL_CONDITION: 
 				# we should get the non-khow preserving plan
@@ -926,7 +929,7 @@ if ROS:
 
 			return response_
 
-		if req.scenario == 'kitchen':
+		if global_current_domain == 'kitchen': # req.scenario == 'kitchen':
 			# ideally, here we would check whether the observations we have so far leave us with a number of 
 			# plan hypotheses where some of those hypotheses require intervention (disc res)
 			# and some don't. in this case (as is the case in the kitchen scenario) we should attempt to
@@ -979,10 +982,17 @@ if ROS:
 	    rospy.spin()
 
 
-	if __name__ == '__main__':
-	    listener()
+	# if __name__ == '__main__':
+	#     listener()
 
 
+args = sys.argv
+
+global_current_domain = args[1]
+
+disc_res_modality = args[2]
+
+listener()
 
 # gen_valid_formula(["pickup_b_blue_2_roomc2"], "")
 # gen_valid_formula(["share_a_a_l1"], "")
@@ -992,256 +1002,258 @@ if ROS:
 
 req = 0
 
-#=================================BOLANDER SCENARIO
-# first human is agent b, second human is agent a (first human leaves the room and has the false belief)
-# goal is (cereal_made) and the plan for this is [pickUpSpoon, pickUpBowlcabinet2, pickUpMilk, pickUpCereal, pourCerealToBowl, pourMilkToBowl]
-# plan is invalid because the regression formula for pickUpBowlcabinet2 is in(bowl,cabinet2) which does not hold 
-# because the first human took the bowl from cabinet2, used it, and transferred it to cabinet1
-# in the blocks and boxes encoding, block b1 is the bowl and it is picked up from bx1 (cabinet2) and put in bx2 (cabinet1)
+if not ROS:
 
-if global_current_domain == 'bolander':
-	curr_state_file = open('curr_state.txt','w')
-	curr_state_file.write(initial_state_bolander)
+	#=================================BOLANDER SCENARIO
+	# first human is agent b, second human is agent a (first human leaves the room and has the false belief)
+	# goal is (cereal_made) and the plan for this is [pickUpSpoon, pickUpBowlcabinet2, pickUpMilk, pickUpCereal, pourCerealToBowl, pourMilkToBowl]
+	# plan is invalid because the regression formula for pickUpBowlcabinet2 is in(bowl,cabinet2) which does not hold 
+	# because the first human took the bowl from cabinet2, used it, and transferred it to cabinet1
+	# in the blocks and boxes encoding, block b1 is the bowl and it is picked up from bx1 (cabinet2) and put in bx2 (cabinet1)
 
-	curr_state_file.close()
+	if global_current_domain == 'bolander':
+		curr_state_file = open('curr_state.txt','w')
+		curr_state_file.write(initial_state_bolander)
 
-	print("Initial state:\n")
-	print("====================\n")
-	print(initial_state_bolander)
-	print("====================\n")
-	  
-	observed_actions = ['(leaveRoom_b_p1)']
-	update_problem_file(observed_actions)
+		curr_state_file.close()
 
-	print("AFTER (leaveRoom_b_p1)")
-	detect_and_resolve_discrepancies(req)
-
-	observed_actions = ['(pickUpBlock_a_b1_bx1_p1)']
-	update_problem_file(observed_actions)
-
-	print("AFTER (pickUpBlock_a_b1_bx1_p1)")
-	detect_and_resolve_discrepancies(req)
-
-	observed_actions = ['(putBlockInBox_a_b1_bx2_p1)']
-	update_problem_file(observed_actions)
-
-
-	print("AFTER (putBlockInBox_a_b1_bx2_p1)")
-	detect_and_resolve_discrepancies(req)
-
-	observed_actions = ['(enterRoom_b_p1)']
-	update_problem_file(observed_actions)
-
-	print("AFTER (enterRoom_b_p1)")
-
-	detect_and_resolve_discrepancies(req)
-
-	# the above produces the following which is what we want because there is no need for Pepper to resolve discrepancies
-	# until the person comes back into the room
-
-	# AFTER (leaveRoom_b_p1)
-	# } 
-	# AFTER (pickUpBlock_a_b1_bx1_p1)
-	# } 
-	# AFTER (putBlockInBox_a_b1_bx2_p1)
-	# } 
-	# AFTER (enterRoom_b_p1)
-	# (informblocklocation b b1 bx2) (discresolutionspecialactionforplanb2) (informblocknotinlocation b b1 bx1) (discresolutionspecialaction1) } 
-
-#=================================BOLANDER SCENARIO (SPOON AND CABINET VARIANT)
-
-if global_current_domain == 'bolander_spoon_cabinet':
-
-	curr_state_file = open('curr_state.txt','w')
-	curr_state_file.write(initial_state_bolander_spoon_cabinet)
-
-	curr_state_file.close()
-
-	print("Initial state:\n")
-	print("====================\n")
-	print(initial_state_bolander_spoon_cabinet)
-	print("====================\n")
-	  
-	observed_actions = ['(opencabinet_b_cabinet2_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(putobjectincabinet_b_bowl1_cabinet2_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(closecabinet_b_cabinet2_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(leaveRoom_b_p1)']
-	update_problem_file(observed_actions)
-
-	detect_and_resolve_discrepancies(req)
-
-	# after this observation we get an empty disc res plan
-
-	observed_actions = ['(opencabinet_a_cabinet2_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(takeobjectoutofcabinet_a_bowl1_cabinet2_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(closecabinet_a_cabinet2_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(opencabinet_a_cabinet1_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(putobjectincabinet_a_bowl1_cabinet1_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(closecabinet_a_cabinet1_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(leaveRoom_a_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(enterRoom_b_p1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(opencabinet_b_cabinet3_p1)']
-	update_problem_file(observed_actions)
-
-
-
-	observed_actions = ['(takeobjectoutofcabinet_b_spoon1_cabinet3_p1)']
-	update_problem_file(observed_actions)
-
-	# print("AFTER (takeobjectoutofcabinet_b_bowl1_cabinet3_p1)")
-	detect_and_resolve_discrepancies(req)
-
-	# this is the disc res plan after the last observation
-
-	#(informspoonnotinlocation b spoon1 cabinet2) (discresolutionspecialaction1) (informspoonlocation b spoon1 cabinet1) (discresolutionspecialactionforplanb2)
-
-
-
-#=================================================================
-#================================ phone charger scenario
-# first human is agent a, second human is agent b
-# goal is (and (charged phone_a))
-
-if global_current_domain == 'charger' or global_current_domain == 'charger_kHow':
-
-	curr_state_file = open('curr_state.txt','w')
-	curr_state_file.write(initial_state_charger)
-
-	curr_state_file.close()
-
-	print("Initial state:\n")
-	print("====================\n")
-	print(initial_state_charger)
-	print("====================\n")
-	  
-	# observed_actions = ['(plugincharger_a_q1)']
-	# update_problem_file(observed_actions)
-
-	observed_actions = ['(shiftgaze_reset_a)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(shiftgaze_a_q1)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(update_vision_based_beliefs)']
-	update_problem_file(observed_actions)
-
-	# observed_actions = ['(chargerAxiom_)']
-	# update_problem_file(observed_actions)
-
-	observed_actions = ['(shiftgaze_reset_a)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(shiftgaze_a_q2)']
-	update_problem_file(observed_actions)
-
-	observed_actions = ['(update_vision_based_beliefs)']
-	update_problem_file(observed_actions)
-
-	if global_current_domain == 'charger_kHow':
-		#Pepper receives message from human and is tasked with bringing a charger to room3 (other charger is in room2)
-		generate_knowhow_preserving_plan("(chargerInQuadrant q9)") #q9 is in room3
-
-	else:
-
-		#SECOND HUMAN COMING INTO ROOM AND TAKING CHARGER
-
-		observed_actions = ['(enterroom1_b_p1)']
+		print("Initial state:\n")
+		print("====================\n")
+		print(initial_state_bolander)
+		print("====================\n")
+		  
+		observed_actions = ['(leaveRoom_b_p1)']
 		update_problem_file(observed_actions)
 
-		# if the following two observations are sent to pepper one after the other then
-		# we might generate and try to execute another non-empty disc res plan because we haven't yet finished executing the previous one
-		# we might want a flag that stops the computational of new disc res plans while a current disc res plan is being executed
+		print("AFTER (leaveRoom_b_p1)")
+		detect_and_resolve_discrepancies(req)
 
-		observed_actions = ['(pickupcharger_b_q1)']
+		observed_actions = ['(pickUpBlock_a_b1_bx1_p1)']
 		update_problem_file(observed_actions)
 
-		observed_actions = ['(leaveroom1_b_p1)']
+		print("AFTER (pickUpBlock_a_b1_bx1_p1)")
+		detect_and_resolve_discrepancies(req)
+
+		observed_actions = ['(putBlockInBox_a_b1_bx2_p1)']
 		update_problem_file(observed_actions)
 
-		detect_and_resolve_discrepancies(req) 
-		# we can simplify this by simply calling the planner with the goal (chargerInQuadrant q1) [b](chargerInQuadrant q1) 
-		# initially, [b](chargerInQuadrant q1)  holds but (chargerInQuadrant q1) doesn't
-		# so the planner will come up with a plan to move robot from q1 to q5, robot picking up charger, 
-		# and finally robot returning to q1 and droppping off the charger there
 
-#=================================================================
-# corridor domain
-# first human is agent a, second human is agent b, and third human is agent c
-# goal is (and [a][b](secret) [a]![c](secret))
-if global_current_domain == 'corridor':
-	curr_state_file = open('curr_state.txt','w')
-	curr_state_file.write(initial_state_corridor_scenario)
+		print("AFTER (putBlockInBox_a_b1_bx2_p1)")
+		detect_and_resolve_discrepancies(req)
 
-	curr_state_file.close()
+		observed_actions = ['(enterRoom_b_p1)']
+		update_problem_file(observed_actions)
 
-	print("Initial state:\n")
-	print("====================\n")
-	print(initial_state_corridor_scenario)
-	print("====================\n")
+		print("AFTER (enterRoom_b_p1)")
 
-	# the first observation is person c entering the room
+		detect_and_resolve_discrepancies(req)
 
-	observed_actions = ['(leaveroomAndStayOutside1_c)'] # to update KB, we observe leaveroomAndStayOutside1
-	update_problem_file(observed_actions)
+		# the above produces the following which is what we want because there is no need for Pepper to resolve discrepancies
+		# until the person comes back into the room
 
-	if 1:
-		detect_and_resolve_discrepancies(req) 
+		# AFTER (leaveRoom_b_p1)
+		# } 
+		# AFTER (pickUpBlock_a_b1_bx1_p1)
+		# } 
+		# AFTER (putBlockInBox_a_b1_bx2_p1)
+		# } 
+		# AFTER (enterRoom_b_p1)
+		# (informblocklocation b b1 bx2) (discresolutionspecialactionforplanb2) (informblocknotinlocation b b1 bx1) (discresolutionspecialaction1) } 
 
-#=================================================================
-#=================================================================
-# kitchen domain
+	#=================================BOLANDER SCENARIO (SPOON AND CABINET VARIANT)
 
-if global_current_domain == 'kitchen':
-	curr_state_file = open('curr_state.txt','w')
-	curr_state_file.write(initial_state_kitchen)
-	curr_state_file.close()
+	if global_current_domain == 'bolander_spoon_cabinet':
 
-	observed_actions = ['(openCabinet_a)'] # the human opens one of the cabinets in the kitchen (and is assumed to look into it, so the effects of openCabinet also encode an observer (pepper in this case) reasoning that the human knows whether there's a spoon and bowl in cabinet)
-	update_problem_file(observed_actions)
+		curr_state_file = open('curr_state.txt','w')
+		curr_state_file.write(initial_state_bolander_spoon_cabinet)
 
-	discriminate_between_plans(0,0,0)
-	# observed_actions = ['(check_cabinet_spoon(human))'] 
-	# update_problem_file(observed_actions)
-	# observed_actions = ['(check_cabinet_bowl(human))'] 
-	# update_problem_file(observed_actions)
-	# observed_actions = ['(moveTo_Dishwasher_a)'] # the human moves from cabinet to dishwasher
-	# update_problem_file(observed_actions) 
+		curr_state_file.close()
 
-#=================================================================
+		print("Initial state:\n")
+		print("====================\n")
+		print(initial_state_bolander_spoon_cabinet)
+		print("====================\n")
+		  
+		observed_actions = ['(opencabinet_b_cabinet2_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(putobjectincabinet_b_bowl1_cabinet2_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(closecabinet_b_cabinet2_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(leaveRoom_b_p1)']
+		update_problem_file(observed_actions)
+
+		detect_and_resolve_discrepancies(req)
+
+		# after this observation we get an empty disc res plan
+
+		observed_actions = ['(opencabinet_a_cabinet2_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(takeobjectoutofcabinet_a_bowl1_cabinet2_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(closecabinet_a_cabinet2_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(opencabinet_a_cabinet1_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(putobjectincabinet_a_bowl1_cabinet1_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(closecabinet_a_cabinet1_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(leaveRoom_a_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(enterRoom_b_p1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(opencabinet_b_cabinet3_p1)']
+		update_problem_file(observed_actions)
 
 
-# goal = "(holding b b1)"
-# predicted_plan = predict_agent_plan("b",goal)
-# # print(predicted_plan)
 
-# if is_plan_ill_formed(predicted_plan,goal):
-# 	emp_plan = gen_empathetic_plan(goal)
-# 	resolve_disc("b",emp_plan,goal)
+		observed_actions = ['(takeobjectoutofcabinet_b_spoon1_cabinet3_p1)']
+		update_problem_file(observed_actions)
+
+		# print("AFTER (takeobjectoutofcabinet_b_bowl1_cabinet3_p1)")
+		detect_and_resolve_discrepancies(req)
+
+		# this is the disc res plan after the last observation
+
+		#(informspoonnotinlocation b spoon1 cabinet2) (discresolutionspecialaction1) (informspoonlocation b spoon1 cabinet1) (discresolutionspecialactionforplanb2)
 
 
 
-# # observed_actions = ['(putBlockInBox_a_b1_bx2_p1)']
-# # update_problem_file(observed_actions,"....","curr_problem.pddl")
+	#=================================================================
+	#================================ phone charger scenario
+	# first human is agent a, second human is agent b
+	# goal is (and (charged phone_a))
+
+	if global_current_domain == 'charger' or global_current_domain == 'charger_kHow':
+
+		curr_state_file = open('curr_state.txt','w')
+		curr_state_file.write(initial_state_charger)
+
+		curr_state_file.close()
+
+		print("Initial state:\n")
+		print("====================\n")
+		print(initial_state_charger)
+		print("====================\n")
+		  
+		# observed_actions = ['(plugincharger_a_q1)']
+		# update_problem_file(observed_actions)
+
+		observed_actions = ['(shiftgaze_reset_a)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(shiftgaze_a_q1)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(update_vision_based_beliefs)']
+		update_problem_file(observed_actions)
+
+		# observed_actions = ['(chargerAxiom_)']
+		# update_problem_file(observed_actions)
+
+		observed_actions = ['(shiftgaze_reset_a)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(shiftgaze_a_q2)']
+		update_problem_file(observed_actions)
+
+		observed_actions = ['(update_vision_based_beliefs)']
+		update_problem_file(observed_actions)
+
+		if global_current_domain == 'charger_kHow':
+			#Pepper receives message from human and is tasked with bringing a charger to room3 (other charger is in room2)
+			generate_knowhow_preserving_plan("(chargerInQuadrant q9)") #q9 is in room3
+
+		else:
+
+			#SECOND HUMAN COMING INTO ROOM AND TAKING CHARGER
+
+			observed_actions = ['(enterroom1_b_p1)']
+			update_problem_file(observed_actions)
+
+			# if the following two observations are sent to pepper one after the other then
+			# we might generate and try to execute another non-empty disc res plan because we haven't yet finished executing the previous one
+			# we might want a flag that stops the computational of new disc res plans while a current disc res plan is being executed
+
+			observed_actions = ['(pickupcharger_b_q1)']
+			update_problem_file(observed_actions)
+
+			observed_actions = ['(leaveroom1_b_p1)']
+			update_problem_file(observed_actions)
+
+			detect_and_resolve_discrepancies(req) 
+			# we can simplify this by simply calling the planner with the goal (chargerInQuadrant q1) [b](chargerInQuadrant q1) 
+			# initially, [b](chargerInQuadrant q1)  holds but (chargerInQuadrant q1) doesn't
+			# so the planner will come up with a plan to move robot from q1 to q5, robot picking up charger, 
+			# and finally robot returning to q1 and droppping off the charger there
+
+	#=================================================================
+	# corridor domain
+	# first human is agent a, second human is agent b, and third human is agent c
+	# goal is (and [a][b](secret) [a]![c](secret))
+	if global_current_domain == 'corridor':
+		curr_state_file = open('curr_state.txt','w')
+		curr_state_file.write(initial_state_corridor_scenario)
+
+		curr_state_file.close()
+
+		print("Initial state:\n")
+		print("====================\n")
+		print(initial_state_corridor_scenario)
+		print("====================\n")
+
+		# the first observation is person c entering the room
+
+		observed_actions = ['(leaveroomAndStayOutside1_c)'] # to update KB, we observe leaveroomAndStayOutside1
+		update_problem_file(observed_actions)
+
+		if 1:
+			detect_and_resolve_discrepancies(req) 
+
+	#=================================================================
+	#=================================================================
+	# kitchen domain
+
+	if global_current_domain == 'kitchen':
+		curr_state_file = open('curr_state.txt','w')
+		curr_state_file.write(initial_state_kitchen)
+		curr_state_file.close()
+
+		observed_actions = ['(openCabinet_a)'] # the human opens one of the cabinets in the kitchen (and is assumed to look into it, so the effects of openCabinet also encode an observer (pepper in this case) reasoning that the human knows whether there's a spoon and bowl in cabinet)
+		update_problem_file(observed_actions)
+
+		discriminate_between_plans(0,0,0)
+		# observed_actions = ['(check_cabinet_spoon(human))'] 
+		# update_problem_file(observed_actions)
+		# observed_actions = ['(check_cabinet_bowl(human))'] 
+		# update_problem_file(observed_actions)
+		# observed_actions = ['(moveTo_Dishwasher_a)'] # the human moves from cabinet to dishwasher
+		# update_problem_file(observed_actions) 
+
+	#=================================================================
+
+
+	# goal = "(holding b b1)"
+	# predicted_plan = predict_agent_plan("b",goal)
+	# # print(predicted_plan)
+
+	# if is_plan_ill_formed(predicted_plan,goal):
+	# 	emp_plan = gen_empathetic_plan(goal)
+	# 	resolve_disc("b",emp_plan,goal)
+
+
+
+	# # observed_actions = ['(putBlockInBox_a_b1_bx2_p1)']
+	# # update_problem_file(observed_actions,"....","curr_problem.pddl")
